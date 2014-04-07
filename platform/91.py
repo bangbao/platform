@@ -5,9 +5,11 @@ import json
 IS_IOS = True
 
 if IS_IOS:
+    PLATFORM_NAME = 'ios91'
     PLATFORM_91_APP_ID = 000001
     PLATFORM_91_APP_KEY = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
 else:
+    PLATFORM_NAME = 'android91'
     PLATFORM_91_APP_ID = 000002
     PLATFORM_91_APP_KEY = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
 
@@ -21,8 +23,11 @@ def login_verify(uin, sid):
     Args:
         uin: 用户的91Uin
         sid: 用户登录91SessionId
+    Returns:
+        user_token
     """
-    sign_str = "%d%d%s%s%s" % (PLATFORM_91_APP_ID, PLATFORM_91_LOGIN_ACT_ID, uin, sid, PLATFORM_91_APP_KEY)
+    sign_str = "%d%d%s%s%s" % (PLATFORM_91_APP_ID, PLATFORM_91_LOGIN_ACT_ID,
+                               uin, sid, PLATFORM_91_APP_KEY)
     sign = hashlib.md5(sign_str).hexdigest()
 
     url = ("%(url)s?AppId=%(app_id)d&Act=%(act)d&Uin=%(uin)s&"

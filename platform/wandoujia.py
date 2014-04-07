@@ -3,6 +3,7 @@
 import utils
 import urllib
 
+PLATFORM_NAME = 'wandoujia'
 PLATFORM_WANDOUJIA_APP_ID = '111111111'
 PLATFORM_WANDOUJIA_APP_SECRET = "aaaaaaaaaaaaaaaaaaaaaaaaaa"
 PLATFORM_WANDOUJIA_APP_PUBLIC_KEY = """-----BEGIN PUBLIC KEY-----

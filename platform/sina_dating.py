@@ -4,6 +4,7 @@ import utils
 import json
 import hashlib
 
+PLATFORM_NAME = 'sina_dating'
 PLATFORM_SINA_DATING_APP_KEY = '111111111'
 PLATFORM_SINA_DATING_APP_SECRET = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
 PLATFORM_SINA_DATING_USER_URL = 'https://api.weibo.com/2/users/show.json'

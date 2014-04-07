@@ -5,15 +5,13 @@ import utils
 import socket
 import struct
 import json
-import requests as http
-from M2Crypto import RSA, EVP, BIO
 
-PP_PUBLIC_KEY = """-----BEGIN PUBLIC KEY-----
+PLATFORM_NAME = 'pp'
+PLATFORM_PP_PUBLIC_KEY = """-----BEGIN PUBLIC KEY-----
 ......
 -----END PUBLIC KEY-----"""
-
-SERVER = 'passport_i.25pp.com'
-PORT = 8080
+PLATFORM_PP_SERVER = 'passport_i.25pp.com'
+PLATFORM_PP_PORT = 8080
 
 
 class PPSocket(object):
@@ -63,7 +61,7 @@ def login_verify(token_key):
         uin: pp uid
         token_key: 二进制数据
     """
-    ppSocket = PPSocket(SERVER, PORT)
+    ppSocket = PPSocket(PLATFORM_PP_SERVER, PLATFORM_PP_PORT)
     length_cmd = struct.pack("<2I", len(token_key) + 8, 0xAA000022)
     send_data = [length_cmd, token_key]
     ppSocket.write(''.join(send_data))
@@ -97,19 +95,19 @@ def login_verify(token_key):
     return data
 
 
-def payment_verify(data):
-    """data 为服务器回调的参数们
+def payment_verify(params):
+    """params 为服务器回调的参数们
     """
-    sign = data.get('sign', '')
-    account = data.get('account', '')
-    amount = data.get('amount', '0')
-    app_id = data.get('app_id', '')
-    billno = data.get('billno', '')
-    order_id = data.get('order_id', '')
-    status = int(data.get('status', 0))
-    roleid = data.get('roleid', '')
-    uuid = data.get('uuid', '')
-    zone = data.get('zone', '')
+    sign = params.get('sign', '')
+    account = params.get('account', '')
+    amount = params.get('amount', '0')
+    app_id = params.get('app_id', '')
+    billno = params.get('billno', '')
+    order_id = params.get('order_id', '')
+    status = int(params.get('status', 0))
+    roleid = params.get('roleid', '')
+    uuid = params.get('uuid', '')
+    zone = params.get('zone', '')
 
     if status != 0:
         return False
@@ -118,7 +116,7 @@ def payment_verify(data):
     order_sign = json.loads(context)
 
     for k, v in order_sign.iteritems():
-        if v != data[k]:
+        if v != params[k]:
             return False
 
     return order_sign

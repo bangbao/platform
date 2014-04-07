@@ -3,6 +3,7 @@
 import json
 import hashlib
 
+PLATFORM_NAME = 'duoku'
 PLATFORM_DUOKU_APP_ID = '111'
 PLATFORM_DUOKU_APP_KEY = 'aaaaaaaaaaaaaaaaaaaaaaaaaaa'
 PLATFORM_DUOKU_APP_SECRET = 'bbbbbbbbbbbbbbbbbbbbbbbbbbb'
@@ -14,6 +15,8 @@ def login_verify(uid, sessionid):
     Args:
         uid: 平台id
         sessionid: 临时授权token
+    Returns:
+        token
     """
     params_data = {
         'appid': PLATFORM_DUOKU_APP_ID,
@@ -48,7 +51,7 @@ def login_verify(uid, sessionid):
 def payment_verify(params):
     """验证签名
     """
-    new_params = {
+    obj = {
         'amount': params.get('amount'),
         'cardtype': params.get('cardtype'),
         'orderid': params.get('orderid'),
@@ -58,9 +61,9 @@ def payment_verify(params):
         'client_secret': params.get('client_secret'),
         'secret': PLATFORM_DUOKU_APP_SECRET,
     }
-    result = new_params['result']
+    result = obj['result']
     if int(result) != 1:
-        return None
+        return False
 
     pre_sign =  ('%(amount)s'
                  '%(cardtype)s'
@@ -68,12 +71,12 @@ def payment_verify(params):
                  '%(result)s'
                  '%(timetamp)s'
                  '%(secret)s'
-                 '%(aid)s') % new_params
+                 '%(aid)s') % obj
 
     new_sign = hashlib.md5(pre_sign).hexdigest()
 
-    if new_sign != new_params['client_secret']:
-        return None
+    if new_sign != obj['client_secret']:
+        return False
 
     return params
 

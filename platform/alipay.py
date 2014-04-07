@@ -1,52 +1,11 @@
 # coding: utf-8
 
-import utils
-
-# 支付宝支付
-RSA_ALIPAY_PUBLIC = """-----BEGIN PUBLIC KEY-----
-......
------END PUBLIC KEY-----"""
-
-
-def login_verify(token):
-    """没有平台用户，用平台标识alipay加token标识用户
-    """
-    return 'alipay_%s' % token
-
-
-def payment_verify(data):
-    """rsa验证数据签名
-    Args:
-        signedData: 要验证的数据
-        signature: 签名
-    Returns:
-        布尔值，True表示验证通过，False表示验证失败
-    """
-    sign = data['sign']
-    notify_data = data['notify_data']
-    signed_data = 'notify_data=%s' % notify_data
-
-    if not utils.rsa_verify_signature(RSA_ALIPAY_PUBLIC, signed_data, sign):
-        return False
-
-    obj = utils.xml2dict(notify_data)
-    if obj['trade_status'] not in ('TRADE_SUCCESS', 'WAIT_BUYER_PAY'):
-        return False
-
-    return obj
-
-
 # 合作商户ID。用签约支付宝账号登录ms.alipay.com后，在账户信息页面获取。
 # PARTNER = "1111111111111"
 
 # 商户收款的支付宝账号
 # SELLER = "alipay1@125.com"
-
-# 回调url
-# PAYMENT_CALLBACK_URL = /api/payment-callback-alipay/
-
-# nginx rewrite data
-# rewrite ^/api/payment-callback-alipay/?(.*) /api_text/?method=payment.text_callback&tp=alipay&$1;
+# PAYMENT_CALLBACK_URL = /payment-callback-alipay/
 
 # 定单数据样例:
 #     {
@@ -70,3 +29,39 @@ def payment_verify(data):
 #       u'buyer_id': u'2088902575820253',                # 消费者ID
 #       u'subject': u'65\u5143\u5b9d'
 #     }
+
+import utils
+
+# 支付宝支付
+PLATFORM_NAME = 'alipay'
+PLATFORM_ALIPAY_PUBLIC_KEY = """-----BEGIN PUBLIC KEY-----
+......
+-----END PUBLIC KEY-----"""
+
+
+def login_verify(token):
+    """没有平台用户，用平台标识alipay加token标识用户
+    """
+    return 'alipay_%s' % token
+
+
+def payment_verify(data):
+    """rsa验证数据签名
+    Args:
+        signedData: 要验证的数据
+        signature: 签名
+    Returns:
+        布尔值，True表示验证通过，False表示验证失败
+    """
+    sign = data['sign']
+    notify_data = data['notify_data']
+    signed_data = 'notify_data=%s' % notify_data
+
+    if not utils.rsa_verify_signature(PLATFORM_ALIPAY_PUBLIC_KEY, signed_data, sign):
+        return False
+
+    obj = utils.xml2dict(notify_data)
+    if obj['trade_status'] not in ('TRADE_SUCCESS', 'WAIT_BUYER_PAY'):
+        return False
+
+    return obj

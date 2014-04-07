@@ -5,7 +5,7 @@ import json
 import hashlib
 import urllib
 
-#机锋开发者uid
+PLATFORM_NAME = 'gfan'
 PLATFORM_GFAN_APP_UID = 111111
 PLATFORM_GFAN_APP_ID = 11111111
 PLATFORM_GFAN_APP_KEY = 'aaaaaaaa'
@@ -17,7 +17,6 @@ def login_verify(token):
     """
     post_data = {'token': token}
     user_agent = 'packageName=%s,appName=%s,channelID=%s' % ('pack_name', 'app_name', PLATFORM_GFAN_APP_KEY)
-
     http_code, content = utils.http.post(PLATFORM_GFAN_VERIFY_URL,
                                          body=urllib.urlencode(post_data),
                                          headers={'User-Agent': user_agent})

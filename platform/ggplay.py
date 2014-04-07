@@ -4,17 +4,21 @@ import utils
 import json
 import hashlib
 
-GOOGLE_PLAY_PUBLIC_KEY = ''
+PLATFORM_NAME = 'ggplay'
+PLATFORM_GGPLAY_PUBLIC_KEY = """-----BEGIN PUBLIC KEY-----
+....
+-----END PUBLIC KEY-----"""
 
 
 def login_verify(token):
     return token
 
 
-def payment_verify(post_params):
+def payment_verify(signature_data):
     """ google_play 支付验证接口
+    Args:
+        signature_data: 支付票据
     """
-    signature_data = post_params.get('signature_data')
     signature_data = urllib.unquote(signature_data)
 
     params = dict(logics.parse_signature_data(signature_data))

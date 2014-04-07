@@ -10,29 +10,31 @@ PLATFORM_KUAIYONG_APP_PUBLIC_KEY = """-----BEGIN PUBLIC KEY-----
 -----END PUBLIC KEY-----"""
 
 
-
 def login_verify(token):
     return token
 
 
 def payment_verify(params):
-    """
+    """支付验证
+    Args:
+        params: 字典参数数据
+    Returns:
+        订单数据
     """
     sign = params['sign']
     notify_data = params["notify_data"]
 
-    decrypt_verify_data = utils.rsa_public_decrypt(PLATFORM_KUAIYONG_APP_PUBLIC_KEY, notify_data)
-    obj = {a_s.split("=")[0]: a_s.split("=")[1] for a_s in decrypt_verify_data.split("&")}
+    decrypt_data = utils.rsa_public_decrypt(PLATFORM_KUAIYONG_APP_PUBLIC_KEY, notify_data)
+    obj = dict(utils.parse_signature_data(decrypt_data))
 
     if int(obj["payresult"]) != 0 or params["dealseq"] != obj["dealseq"]:
         return False
 
-    key_list = ["dealseq", "notify_data", "orderid", "subject", "uid", "v"]
-    list_data = ['%s=%s' % (str(k), str(data[k])) for k in key_list]
-    verify_data =  '&'.join(list_data)
-    sign = data["sign"]
-    
-    if not utils.rsa_verify_signature2(APP_PUBLIC_KEY, verify_data, sign):
+    sign_keys = ("dealseq", "notify_data", "orderid", "subject", "uid", "v")
+    sign_list = ('%s=%s' % (k, params[k]) for k in sign_keys)
+    sign_data =  '&'.join(sign_list)
+
+    if not utils.rsa_verify_signature2(APP_PUBLIC_KEY, sign_data, sign):
         return False
 
     return obj

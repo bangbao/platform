@@ -17,7 +17,7 @@
 #         “product”: [
 #             {
 #             "log_time" : "20120321154451",      # 定单时间
-#             "appid" : "OA12345678",             # 应用ID
+#             "appid" : "aaaaaaaaa",             # 应用ID
 #             "product_id" : "0900012345",        # 商品ID
 #             "charge_amount" : 1000,             # 充值金额
 #             “tid” : ”AFEDDFEFE!@dFDFfFFFF”  # 定单ID

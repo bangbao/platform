@@ -3,14 +3,11 @@
 import json
 import hashlib
 
-#登陆当乐的请求url
-PLATFORM_DOWNLOY_APP_URL = 'http://connect.d.cn/open/member/info/'
-#接入时由当乐分配的游戏/应用ID。
-PLATFORM_DOWNLOY_APP_ID = "111"
-#接入时由当乐分配的游戏/应用密钥。
-PLATFORM_DOWNLOY_APP_KEY = "aaaaaaaa"
-#支付模块
-PLATFORM_DOWNLOY_PAYMENT_KEY = "bbbbbbbb"
+PLATFORM_NAME = 'downjoy'
+PLATFORM_DOWNJOY_APP_URL = 'http://connect.d.cn/open/member/info/'  # 登陆当乐的请求url
+PLATFORM_DOWNJOY_APP_ID = "111"              # 接入时由当乐分配的游戏/应用ID。
+PLATFORM_DOWNJOY_APP_KEY = "aaaaaaaa"        # 接入时由当乐分配的游戏/应用密钥
+PLATFORM_DOWNJOY_PAYMENT_KEY = "bbbbbbbb"    # 支付模块
 
 
 def login_verify(mid, token):
@@ -18,15 +15,17 @@ def login_verify(mid, token):
     Args:
         mid: 平台id
         token: 临时授权token
+    Returns:
+        token
     """
-    sig = hashlib.md5(token + "|" + PLATFORM_DOWNLOY_APP_KEY).hexdigest()
+    sig = hashlib.md5(token + "|" + PLATFORM_DOWNJOY_APP_KEY).hexdigest()
     
     url = '%(url)s?app_id=%(app_id)s&mid=%(mid)s&token=%(token)s&sig=%(sig)s' % {
-                'app_id': PLATFORM_DOWNLOY_APP_ID,
+                'app_id': PLATFORM_DOWNJOY_APP_ID,
                 'mid': mid,
                 'token': token,
                 'sig': sig,
-                'url': PLATFORM_DOWNLOY_APP_URL}
+                'url': PLATFORM_DOWNJOY_APP_URL}
 
     http_code, content = utils.http.get(url, timeout=30)
 
@@ -43,7 +42,7 @@ def login_verify(mid, token):
 def payment_verify(params):
     """验证签名
     """
-    params['key'] = PLATFORM_DOWNLOY_APP_KEY
+    params['key'] = PLATFORM_DOWNJOY_APP_KEY
 
     pre_sign = ('%(order)s'
                 '%(money)s'

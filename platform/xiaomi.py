@@ -5,7 +5,7 @@ import json
 import hashlib
 import hmac
 
-#设置应用  app key和secret
+PLATFORM_NAME = 'xiaomi'
 PLATFORM_XIAOMI_APP_ID = '11111'
 PLATFORM_XIAOMI_APP_KEY = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
 PLATFORM_XIAOMI_APP_URL = "http://mis.migc.xiaomi.com/api"
@@ -38,8 +38,7 @@ def login_verify(uid, session_id):
                 'appId': APP_ID,
                 'session': session_id,
                 'uid': uid,
-                'signature': signature,
-            }
+                'signature': signature}
 
     http_code, content = utils.http.get(url, timeout=10)
 

@@ -1,9 +1,19 @@
 # coding: utf-8
 
+#     params example:
+#     {
+#      u'account': u'i651866345',
+#      u'amount': u'0.10',
+#      u'order_id': u'2014040300303453',
+#      u'order_id_com': u'aaaaaa-h1-4-1396529027',
+#      u'result': u'success',
+#      u'user_id': u'563789'
+#      }
+
 import utils
 import json
 
-
+PLATFORM_NAME = 'itools'
 PLATFORM_ITOOLS_PUBLIC_KEY = """-----BEGIN PUBLIC KEY-----
 ......
 -----END PUBLIC KEY-----"""
@@ -16,15 +26,6 @@ def login_verify(token):
 def payment_verify(params):
     """支付验证
     order_id_com
-    params example:
-    {
-     u'account': u'i651866345',
-     u'amount': u'0.10',
-     u'order_id': u'2014040300303453',
-     u'order_id_com': u'aaaaaa-h1-4-1396529027',
-     u'result': u'success',
-     u'user_id': u'563789'
-     }
     """
     sign = params.get('sign', '')
     notify_data = params.get('notify_data', '')
