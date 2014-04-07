@@ -21,7 +21,7 @@ def payment_verify(signature_data):
     """
     signature_data = urllib.unquote(signature_data)
 
-    params = dict(logics.parse_signature_data(signature_data))
+    params = dict(logics.parse_cgi_data(signature_data))
     signed_data = params.get('signedData', '')
     signature = params.get('signature', '')
 

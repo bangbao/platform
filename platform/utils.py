@@ -8,7 +8,12 @@ from M2Crypto import RSA, EVP, BIO
 
 
 def rsa_public_encrypt(public_key, message):
-    """RSA公钥加密
+    """RSA方式公钥加密数据
+    Args:
+        public_key: 公钥
+        message: 要加密的数据
+    Returns:
+        加密后的数据
     """
     bio = BIO.MemoryBuffer(public_key)
     rsa = RSA.load_pub_key_bio(bio)
@@ -17,7 +22,12 @@ def rsa_public_encrypt(public_key, message):
 
 
 def rsa_public_decrypt(public_key, sign_data):
-    """rsa方式公钥揭秘数据
+    """rsa方式公钥解密数据
+    Args:
+        public_key: 公钥
+        sign_data: 要解密的数据
+    Returns:
+        加密后的数据
     """
     bio = BIO.MemoryBuffer(public_key)
     rsa = RSA.load_pub_key_bio(bio)
@@ -27,7 +37,7 @@ def rsa_public_decrypt(public_key, sign_data):
 
 
 def rsa_verify_signature(publicKey, signedData, signature):
-    """rsa验证数据签名
+    """rsa方式验证数据签名
     Args:
         publicKey: 公钥， 已格式化的pem
         signedData: 要验证的数据
@@ -45,7 +55,7 @@ def rsa_verify_signature(publicKey, signedData, signature):
 
 
 def rsa_verify_signature2(publicKey, signedData, signature):
-    """rsa验证数据签名
+    """rsa方式验证数据签名
     Args:
         publicKey: 公钥， 已格式化的pem
         signedData: 要验证的数据
@@ -61,14 +71,19 @@ def rsa_verify_signature2(publicKey, signedData, signature):
     return rsa.verify(digest, base64.decodestring(signature), "sha1")
 
 
-def parse_signature_data(signature_data):
-    pairs = (s1 for s1 in signature_data.split('&'))
+def parse_cgi_data(cgi_data):
+    """把cgi格式的数据转换为key-value格式
+    Args:
+        cgi_data: 数据 ‘sign=3&text=abc&bat=test'
+    Yield:
+        (key, value)
+    """
+    pairs = (s1 for s1 in sgi_data.split('&'))
 
     for name_value in pairs:
         nv = name_value.split('=', 1)
         if len(nv) != 2:
             continue
-
         yield nv
 
 
@@ -122,3 +137,4 @@ class XMLHandler(xml.sax.handler.ContentHandler):
 
     def getDict(self):
         return self.mapping
+

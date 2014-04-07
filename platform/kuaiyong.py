@@ -25,7 +25,7 @@ def payment_verify(params):
     notify_data = params["notify_data"]
 
     decrypt_data = utils.rsa_public_decrypt(PLATFORM_KUAIYONG_APP_PUBLIC_KEY, notify_data)
-    obj = dict(utils.parse_signature_data(decrypt_data))
+    obj = dict(utils.parse_cgi_data(decrypt_data))
 
     if int(obj["payresult"]) != 0 or params["dealseq"] != obj["dealseq"]:
         return False
