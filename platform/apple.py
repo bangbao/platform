@@ -21,7 +21,7 @@ def payment_verify(receipt_data):
     """receipt-data 为apple前端支付后回来的票据， 已用base64编码
     """
     code, content = utils.http.post(APPLE_VERIFY_RECEIPTS_URL,
-                                    body=json.dumps({'receipt-data': receipt_data}),
+                                    json.dumps({'receipt-data': receipt_data}),
                                     headers={"Content-type": "application/json"},
                                     validate_cert=False)
     if code != 200:

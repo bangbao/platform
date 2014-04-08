@@ -18,7 +18,7 @@ def login_verify(token):
     post_data = {'token': token}
     user_agent = 'packageName=%s,appName=%s,channelID=%s' % ('pack_name', 'app_name', PLATFORM_GFAN_APP_KEY)
     http_code, content = utils.http.post(PLATFORM_GFAN_VERIFY_URL,
-                                         body=urllib.urlencode(post_data),
+                                         urllib.urlencode(post_data),
                                          headers={'User-Agent': user_agent})
 
     if http_code != 200:

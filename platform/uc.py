@@ -43,7 +43,7 @@ def login_verify(sid):
     }
 
     http_code, content = utils.http.post(PLATFORM_UC_SERVER_URL,
-                                         body=json.dumps(post_data),
+                                         json.dumps(post_data),
                                          timeout=30)
 
     if http_code != 200:
@@ -71,7 +71,7 @@ def ucid_bind_create(self, game_user):
     }
 
     http_code, content = utils.http.post(PLATFORM_UC_SERVER_URL,
-                                         body=json.dumps(post_data),
+                                         json.dumps(post_data),
                                          timeout=30)
 
     if http_code != 200:
