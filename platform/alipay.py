@@ -30,7 +30,7 @@
 #       u'subject': u'65\u5143\u5b9d'
 #     }
 
-import utils
+from helper import utils
 
 # 支付宝支付
 PLATFORM_NAME = 'alipay'

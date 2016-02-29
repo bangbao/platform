@@ -1,17 +1,17 @@
 # coding: utf-8
 
-import utils
 import json
 import hashlib
+from helper import utils
 
 # 韩文IOS平台
+PLATFORM_KUNLUN_PAYMENT_KEY = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
 PLATFORM_KUNLUN_SERVICE_URL = 'http://mc.sjsgkr.koramgame.com/'
 PLATFORM_KUNLUN_PRODUCTID = 111
 PLATFORM_KUNLUN_REGIONID = 111001
 PLATFORM_KUNLUN_LOGIN_ACT = 'User.getInfo'
 PLATFORM_KUNLUN_REGIST_ACT = 'User.regist'
 PLATFORM_KUNLUN_INIT_ACT = 'User.init'
-PLATFORM_KUNLUN_PAYMENT_KEY = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
 PLATFORM_KUNLUN_LOG_BASEPATH = r'/data/syslog/platformlog'
 PLATFORM_KUNLUN_LOG_SWITCH = False
 # 韩文Tstore平台

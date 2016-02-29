@@ -1,124 +1,137 @@
 # coding: utf-8
 
-import utils
-
-import socket
-import struct
 import json
+import time
+from helper import http
+from helper import utils
 
+__VERSION__ = '1.4.3'
 PLATFORM_NAME = 'pp'
-PLATFORM_PP_PUBLIC_KEY = """-----BEGIN PUBLIC KEY-----
-......
+APP_ID = '1111'
+APP_KEY = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+PUBLIC_KEY = """-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu/nvFcF8nIai164SuOUb
+UB795u2U/ho1duPe6gm3NweWubD/spZNx5bqdRcM62dJ48YKJoE8AyMEDMoUMy+M
+oikH68mGFF8R5EnetADfhKd6YdO87AI+M8acOm01/oBTkkYgb4+FWxjNf2s7Zfsv
+h3JdzDaE76kuc950X8F3jnFNT3C2ff2VQAllJFwn4lJPi7lhN0jyHGQAC+9k9fOJ
+FLYOeUbj6YGugyvob1uxBG3XpnctuI49LMdFr6e104ewcF57Ao2hGXKaUlXXHSPj
+V6ea2bGzCH4Fd3BZF9phTQ8+zZeNczgRgyy6p/I71RT9WR2Ve7gO02BuMcOUPren
+LwIDAQAB
 -----END PUBLIC KEY-----"""
-PLATFORM_PP_SERVER = 'passport_i.25pp.com'
-PLATFORM_PP_PORT = 8080
+GET_USERINFO_URL = 'http://passport_i.25pp.com:8080/account?tunnel-command=2852126760'
+# 返回数据0是成功的数据，1是失败的数据
+RETURN_DATA = {
+    0: 'success',
+    1: 'fail',
+}
 
 
-class PPSocket(object):
-    _connection = None
-
-    def __init__(self, server, port):
-        self.connect(server, port)
-
-    def connect(self, server, port):
-        try:
-            self._connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        except socket.error, e:
-            print 'Strange error creating socket:%s' % e
-
-        try:
-            self._connection.connect((server, port))
-        except socket.gaierror, e:
-            print 'Address-related error connecting to server :%s' % e
-        except socket.error, e:
-            print 'Connection error:%s' % e
-
-    def disconnect(self):
-        if self._connection:
-            self._connection.close()
-            self._connection = None
-            return True
-        return False
-
-    def write(self, data):
-        try:
-            self._connection.sendall(data)
-        except socket.error, e:
-            print 'sendall error:%s' % e
-
-    def read(self):
-        try:
-            result = self._connection.recv(1024)
-        except socket.error, e:
-            print 'recv error:%s' % e
-            result = ""
-        return result
-
-
-def login_verify(token_key):
-    """
+def login_verify(req, params=None):
+    """登录验证
     Args:
-        uin: pp uid
-        token_key: 二进制数据
+        req: request封装，以下是验证所需参数
+            session_id: 32 位字符串
+        params: 测试专用
+    Returns:
+        平台相关信息(openid必须有)
     """
-    ppSocket = PPSocket(PLATFORM_PP_SERVER, PLATFORM_PP_PORT)
-    length_cmd = struct.pack("<2I", len(token_key) + 8, 0xAA000022)
-    send_data = [length_cmd, token_key]
-    ppSocket.write(''.join(send_data))
-    result_data = ppSocket.read()
-    result_len = len(result_data)
+    if not params:
+        params = {
+            'session_id': req.get_argument('session_id'),
+        }
+    session_id = params['session_id']
 
-    data = {'status': 0, 'uin': None}
+    sign_str = 'sid=%s%s' % (session_id, APP_KEY)
+    post_data = json.dumps({
+        'id': int(time.time()),
+        'service': 'account.verifySession',
+        'data': {'sid': session_id},
+        'game': {'gameId': APP_ID},
+        'encrypt': 'md5',
+        'sign': utils.hashlib_md5_sign(sign_str),
+    })
+    headers = {'Content-type': 'application/json;charset=utf-8'}
+    # 对方服务器经常timeout
+    try:
+        http_code, content = http.post(GET_USERINFO_URL, post_data, headers=headers, timeout=1)
+        #print http_code, content
+    except:
+        return None
+    if http_code != 200:
+        return None
 
-    if result_len == 0:
-        # 失败
-        pass
-    elif result_len == struct.calcsize("<3I"):
-        # 失败
-        ps_len, ps_commmand, ps_status = struct.unpack("<3I", result_data)
-        data['status'] = ps_status
-    else:
-        # 成功
-        username_len = result_len - (3 * 4 + 1 + 8)
-        try:
-            ps_len, ps_commmand, ps_status, ps_username, ps_end, ps_uid = struct.unpack("<3I%dssQ" % username_len, result_data)
-        except:
-            ps_status = 100
-            ps_uid = None
+    result = json.loads(content)
+    if int(result['state']['code']) != 1:
+        return None
 
-        if ps_status == 0:
-            data['status'] = 1
-            data['uin'] = ps_uid
+    data = result['data']
+    openid = data['accountId']
+    if data['creator'] != 'PP':
+        openid = '%s%s' % (data['creator'], openid)
 
-    self.disconnect()
-
-    return data
+    return {
+        'openid': openid,                  # 平台标识
+        'openname': data['nickName'],      # 平台昵称
+    }
 
 
-def payment_verify(params):
-    """params 为服务器回调的参数们
+def payment_verify(req, params=None):
+    """支付验证
+    Args:
+        req: request封装，以下是验证所需参数
+            order_id: 兑换订单号
+            billno:   厂商订单号(原样返回给游戏服)
+            account:  通行证账号
+            amount:   兑换 PP 币数量
+            status:   状态: 是 0 正常状态 1 已兑换过并成功返回
+            app_id:   厂商应用 ID(原样返回给游戏服)
+            uuid:     设备号(返回的 uuid 为空)
+            roleid:   厂商应用角色 id(原样返回给游戏服)
+            zone:     厂商应用分区 id(原样返回给游戏服)
+            sign:     签名(RSA 私钥加密) 是
+        params: 测试专用
     """
-    sign = params.get('sign', '')
-    account = params.get('account', '')
-    amount = params.get('amount', '0')
-    app_id = params.get('app_id', '')
-    billno = params.get('billno', '')
-    order_id = params.get('order_id', '')
-    status = int(params.get('status', 0))
-    roleid = params.get('roleid', '')
-    uuid = params.get('uuid', '')
-    zone = params.get('zone', '')
+    if not params:
+        params = {
+            'order_id': req.get_argument('order_id', ''),
+            'billno': req.get_argument('billno', ''),
+            'account': req.get_argument('account', ''),
+            'amount': req.get_argument('amount', '0'),
+            'status': int(req.get_argument('status', 1)),
+            'app_id': req.get_argument('app_id', ''),
+            'roleid': req.get_argument('roleid', ''),
+            'uuid': req.get_argument('uuid', ''),
+            'zone': req.get_argument('zone', ''),
+            'sign': req.get_argument('sign', ''),
+        }
 
-    if status != 0:
-        return False
+    if not params['sign'] or not params['billno']:
+        return RETURN_DATA, None
 
-    context = utils.rsa_public_decrypt(PP_PUBLIC_KEY, sign)
-    order_sign = json.loads(context)
+    if int(params['status']) != 0:
+        return_data = dict(RETURN_DATA)
+        return_data[1] = RETURN_DATA[0]
+        return return_data, None
 
+    ctxt = utils.rsa_public_decrypt(PUBLIC_KEY, params['sign'])
+    order_sign = json.loads(ctxt)
     for k, v in order_sign.iteritems():
         if v != params[k]:
-            return False
+            return RETURN_DATA, None
 
-    return order_sign
+    pay_data = {
+        'app_order_id': params['billno'],         # 自定义定单id
+        'order_id': params['order_id'],           # 平台定单id
+        'order_money': float(params['amount']),   # 平台实际支付money 单位元
+        'uin': params['account'],                 # 平台用户id
+        'platform': PLATFORM_NAME,                # 平台标识名
+    }
+    return RETURN_DATA, pay_data
+
+
+if __name__ == '__main__':
+    print login_verify('', {'session_id': '856b8e5424398602d8ef8d6a88fd02af'})
+
+
 
 

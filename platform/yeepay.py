@@ -1,5 +1,6 @@
 # coding: utf-8
 
+PLATFORM_YEEPAY_SECERT_KEY = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
 PLATFORM_YEEPAY_ENABLE = True
 PLATFORM_YEEPAY_CMD = 'Buy'
 PLATFORM_YEEPAY_MERID = '111111111'
@@ -8,7 +9,6 @@ PLATFORM_YEEPAY_CURRENCY = 'CNY'
 PLATFORM_YEEPAY_PRODUCT_NAME = 'product_name'
 PLATFORM_YEEPAY_PRODUCT_TYPE = 'product_coin'
 PLATFORM_YEEPAY_COMMAND_URL = 'https://www.yeepay.com/app-merchant-proxy/node'
-PLATFORM_YEEPAY_SECERT_KEY = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
 
 
 def yeepay_pay(user_id, amount, kcoin, channel, product_id):
