@@ -1,3 +1,4 @@
+# coding: utf-8
 
 import json
 import urllib
@@ -87,15 +88,24 @@ def login_verify(req, params=None):
     }
 
 
-
-
-
 def payment_verify(req, params=None):
     """支付验证
     Args:
         req: request封装，以下是验证所需参数
             encryptkey: 使用 RSA 加密商户AESKey后生成的密钥密文
             data: 对含有签名的基本业务数据JSON串加密后形成的密文
+                gameId:          游戏ID
+                gameOrderId:     订单号
+                gameUserId:      用户标识
+                payState:        支付状态
+                errorCode:       错误码
+                errorMsg:        错误信息
+                expandMsg:       扩展信息
+                paySuccessMoney: 支付金额
+                lewanOrderId:    乐玩系统里的定单ID
+                serverId:        服务的服ID
+                balanceAmt:      支付余额
+                sign:            签名
         params: 测试专用
     """
     if not params:
@@ -137,67 +147,8 @@ def payment_verify(req, params=None):
     return RETURN_DATA, pay_data
 
 
-
-def payment_verify(encryptkey, params):
-    """支付回调验证，extern 为自定义
-    Args:
-        params: 字典参数数据
-            gameId:      游戏ID
-            gameOrderId:     订单号
-            gameUserId: 用户标识
-            payState: 支付状态
-            errorCode:   错误码
-            errorMsg:       错误信息
-            expandMsg:         扩展信息
-            paySuccessMoney:      支付金额
-            lewanOrderId:        乐玩系统里的定单ID
-            serverId:        服务的服ID
-            balanceAmt:        支付余额
-            sign:        签名
-    Returns:
-        支付数据
-    """
-    def generate_aes_key(PRIVATEKEY, encrypt_key):
-        private_bio = BIO.MemoryBuffer(PRIVATEKEY)
-        private_rsa = RSA.load_key_bio(private_bio)
-        b64string = base64.b64decode(encrypt_key)
-        aes_key = private_rsa.private_decrypt(b64string, RSA.pkcs1_padding)
-        return aes_key
-    aes_key = generate_aes_key(PRIVATEKEY, encryptkey)
-
-    def generate_aes(base64_data, aes_key):
-        data = base64.b64decode(base64_data)
-        iv = '\0' * 16
-        cipher = EVP.Cipher(alg='aes_128_ecb', key=aes_key, iv=iv, op=0, d='sha1')
-        buf = cipher.update(data)
-        buf = buf + cipher.final()
-        del cipher
-        return buf
-
-    aes_data = generate_aes(params, aes_key)
-
-    aes_dict = json.loads(aes_data)
-    sign = aes_dict.pop('sign')
-    result = sorted(aes_dict.iteritems(), key=lambda x: x[0])
-
-    result = ['%s' % v for k, v in result]
-    result_str = ''.join(result)
-
-    if isinstance(result_str, unicode):
-        result_str = result_str.encode('utf-8')
-
-    if not utils.rsa_verify_signature(PUBLICKEY, result_str, sign):
-        return None
-
-    if aes_dict.get('payState', -1) not in {2}:
-        return None
-
-    return aes_dict
-
-
-
-# if __name__ == '__main__':
-#     encry = 'l4vpFR0Xq9GJTJJvfgvbVNWh741UM8TFIyh8CWDJjBTktVd0AmE4BqpXI+s3xcwvZl+UNRO+gcTqUiWj8qOUBHNynASKrYiAladt9F22S51S3mTe5xTiW5MfAd0SlXjVq7cD8Zo2XlS6pLC6XOzG4a+9LPS7kHTxlVRsYtgOeLg='
-#     data = 'lDAMn2UBHunBwjqLOrJ4TPFPavixMv4H+CoLsZh7JIz31KQOCiiS/Mgwm32rMROl0hCARHBKzjjafxuMADwxDP1maligHu/cXq3VKPywPQjWUDVavLU9ZsJcsfA+vBg8ypRf20lLircirE3LZO76dBO0hMzVICtZaXDM8Cgh95+plE/Jv+9YOjypD0SLK7D1XX1jFXuCSZkz/lkVTraD96cKyX9yHhZJlFsIJo4gOfCRREsUfej3NykICd6qTTBI36LSQax8PjimH+86hnaAvM4lv7E4QNt0D7Ir5NBp1Sq4t4eKt0FmidqarkEvGH2PwrPNfKeW8Slg4CX0jIidaIvgg3c6lEPOrqcykW4364VpRa/IIrYNu5ggvcsAEEus8yckExqGzJnNAPHOt3G6njsMSOanNnJJRcQMNywB3V/feMQ1FcBDEqMHrKgThi9wh7meu+Uq4xglq4gJV/gQB8dW5hbpry1ux8Z5B8UrPjs='
-#     print payment_verify(encry, data)
+if __name__ == '__main__':
+    encryptkey = 'l4vpFR0Xq9GJTJJvfgvbVNWh741UM8TFIyh8CWDJjBTktVd0AmE4BqpXI+s3xcwvZl+UNRO+gcTqUiWj8qOUBHNynASKrYiAladt9F22S51S3mTe5xTiW5MfAd0SlXjVq7cD8Zo2XlS6pLC6XOzG4a+9LPS7kHTxlVRsYtgOeLg='
+    data = 'lDAMn2UBHunBwjqLOrJ4TPFPavixMv4H+CoLsZh7JIz31KQOCiiS/Mgwm32rMROl0hCARHBKzjjafxuMADwxDP1maligHu/cXq3VKPywPQjWUDVavLU9ZsJcsfA+vBg8ypRf20lLircirE3LZO76dBO0hMzVICtZaXDM8Cgh95+plE/Jv+9YOjypD0SLK7D1XX1jFXuCSZkz/lkVTraD96cKyX9yHhZJlFsIJo4gOfCRREsUfej3NykICd6qTTBI36LSQax8PjimH+86hnaAvM4lv7E4QNt0D7Ir5NBp1Sq4t4eKt0FmidqarkEvGH2PwrPNfKeW8Slg4CX0jIidaIvgg3c6lEPOrqcykW4364VpRa/IIrYNu5ggvcsAEEus8yckExqGzJnNAPHOt3G6njsMSOanNnJJRcQMNywB3V/feMQ1FcBDEqMHrKgThi9wh7meu+Uq4xglq4gJV/gQB8dW5hbpry1ux8Z5B8UrPjs='
+    print payment_verify('', {'encryptkey': encryptkey, 'data': data})
 
